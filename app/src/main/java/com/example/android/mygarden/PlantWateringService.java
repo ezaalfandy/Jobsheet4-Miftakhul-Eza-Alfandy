@@ -41,14 +41,13 @@ public class PlantWateringService extends IntentService {
 
     public static final String ACTION_WATER_PLANT = "com.example.android.mygarden.action.water_plant";
     public static final String ACTION_UPDATE_PLANT_WIDGETS = "com.example.android.mygarden.action.update_plant_widgets";
-    public static final String EXTRA_PLANT_ID = "com.example.android.mygarden.extra.PLANT_ID";;
 
     public PlantWateringService() {
         super("PlantWateringService");
     }
 
     /**
-     * Starts this service to perform WaterPlant action with the given parameters. If
+     * Starts this service to perform WaterPlants action with the given parameters. If
      * the service is already performing a task this action will be queued.
      *
      * @see IntentService
@@ -141,10 +140,13 @@ public class PlantWateringService extends IntentService {
             cursor.close();
             canWater = (timeNow - wateredAt) > PlantUtils.MIN_AGE_BETWEEN_WATER &&
                     (timeNow - wateredAt) < PlantUtils.MAX_AGE_WITHOUT_WATER;
+
             imgRes = PlantUtils.getPlantImageRes(this, timeNow - createdAt, timeNow - wateredAt, plantType);
         }
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(this);
         int[] appWidgetIds = appWidgetManager.getAppWidgetIds(new ComponentName(this, PlantWidgetProvider.class));
+        //Trigger data update to handle the GridView widgets and force a data refresh
+        appWidgetManager.notifyAppWidgetViewDataChanged(appWidgetIds, R.id.widget_grid_view);
         //Now update all widgets
         PlantWidgetProvider.updatePlantWidgets(this, appWidgetManager, imgRes,plantId ,canWater,appWidgetIds);
     }
